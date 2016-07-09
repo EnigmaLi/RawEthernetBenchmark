@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 	if(strcmp(argv[1], "server") == 0)
 		IS_LOCAL_SERVER = 1;
 	else if(strcmp(argv[1], "client") == 0)
-		IS_LOCAL_SERVER = 1;
+		IS_LOCAL_SERVER = 0;
 	else {
 		printf(">>> Wrong Arg!\n");
 		return -1;
