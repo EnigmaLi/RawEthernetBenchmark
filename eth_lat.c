@@ -58,7 +58,6 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	split_mac(argv[2]);
 
 	strcpy(if_name, DEFAULT_IF);
 
