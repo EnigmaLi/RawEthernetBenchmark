@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 	const int BUFF_SIZE = 64;
 	int TEST_REPEAT_NUM = 1000;
 	int IS_LOCAL_SERVER = 0;
-	uint8_t MY_DEST_MAC[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+	uint8_t MY_DEST_MAC[6] = {0xf4, 0x52, 0x14, 0x94, 0x99, 0x61};
 
 	/***************** Send Init *****************/
 	int sock_fd_send;
@@ -165,6 +165,7 @@ int main(int argc, char *argv[]) {
 	    		printf("Send failed\n");
 				return -1;
 			}
+			printf(">>> Sent!\n");
 			while(1) {
 				num_bytes = recvfrom(sock_fd_recv, recv_buff, BUFF_SIZE, 0, NULL, NULL);
 				if (eh_recv->ether_shost[0] == MY_DEST_MAC[0] &&
@@ -172,13 +173,23 @@ int main(int argc, char *argv[]) {
 					eh_recv->ether_shost[2] == MY_DEST_MAC[2] &&
 					eh_recv->ether_shost[3] == MY_DEST_MAC[3] &&
 					eh_recv->ether_shost[4] == MY_DEST_MAC[4] &&
-					eh_recv->ether_shost[5] == MY_DEST_MAC[5]) {
+					eh_recv->ether_shost[5] == MY_DEST_MAC[5]) 
+					&&
+					eh_recv->ether_dhost[0] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[0] &&
+					eh_recv->ether_dhost[1] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[1] &&
+					eh_recv->ether_dhost[2] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[2] &&
+					eh_recv->ether_dhost[3] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[3] &&
+					eh_recv->ether_dhost[4] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[4] &&
+					eh_recv->ether_dhost[5] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[5]) {
 					clock_gettime(CLOCK_MONOTONIC, &ts);
 					uint64_t t2 = ts.tv_nsec;
 					time_measure[i] = ((double)(t2 - t1)) / (1000.0 * 2); /* Convert ns to us */
 					printf(">>> Reply Revieved!\n");
 				}
-				else continue;
+				else {
+					printf(">>> Not My Packet, Drop!\n");
+					continue;
+				}
 			}
 		}
 	}
@@ -194,11 +205,22 @@ int main(int argc, char *argv[]) {
 						eh_recv->ether_shost[2] == MY_DEST_MAC[2] &&
 						eh_recv->ether_shost[3] == MY_DEST_MAC[3] &&
 						eh_recv->ether_shost[4] == MY_DEST_MAC[4] &&
-						eh_recv->ether_shost[5] == MY_DEST_MAC[5]) {
+						eh_recv->ether_shost[5] == MY_DEST_MAC[5]
+						&&
+						eh_recv->ether_dhost[0] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[0] &&
+						eh_recv->ether_dhost[1] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[1] &&
+						eh_recv->ether_dhost[2] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[2] &&
+						eh_recv->ether_dhost[3] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[3] &&
+						eh_recv->ether_dhost[4] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[4] &&
+						eh_recv->ether_dhost[5] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[5]) {
 						clock_gettime(CLOCK_MONOTONIC, &ts);
 						uint64_t t2 = ts.tv_nsec;
+						printf(">>> My Packet!\n");
 					}
-					else continue;
+					else {
+						printf(">>> Not My Packet, Drop!\n");
+						continue;
+					}
 			}
 
 			if (sendto(sock_fd_send, send_buff, tx_len, 0, (struct sockaddr*)&socket_address,
