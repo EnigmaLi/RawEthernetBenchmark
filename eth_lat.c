@@ -224,7 +224,8 @@ int main(int argc, char *argv[]) {
 						clock_gettime(CLOCK_MONOTONIC, &ts);
 						uint64_t t2 = ts.tv_nsec;
 						printf(">>> My Packet!\n");
-						printf(">>> data: [0] %X, [1] %X, [2] %X, [3] %X\n", recv_buff[0], recv_buff[1], recv_buff[2], recv_buff[3]);
+						printf(">>> data: [0] %X, [1] %X, [2] %X, [3] %X\n", recv_buff[tx_len], recv_buff[tx_len + 1],
+																			 recv_buff[tx_len + 2], recv_buff[tx_len + 3]);
 
 						break;
 					}
