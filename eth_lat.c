@@ -213,7 +213,11 @@ int main(int argc, char *argv[]) {
 		for(int i = 0; i < TEST_REPEAT_NUM; i++) {
 			while(1) {
 					num_bytes = recvfrom(sock_fd_recv, recv_buff, BUFF_SIZE, 0, NULL, NULL);
-
+					printf(">>> Get Pak:\n");
+					printf("shost: %X:%X:%X:%X:%X:%X\n", eh_recv->ether_shost[0], eh_recv->ether_shost[1], eh_recv->ether_shost[2],
+														eh_recv->ether_shost[3], eh_recv->ether_shost[4], eh_recv->ether_shost[5]);
+					printf("dhost: %X:%X:%X:%X:%X:%X\n", eh_recv->ether_dhost[0], eh_recv->ether_dhost[1], eh_recv->ether_dhost[2],
+														eh_recv->ether_dhost[3], eh_recv->ether_dhost[4], eh_recv->ether_dhost[5]);
 					if (eh_recv->ether_shost[0] == MY_DEST_MAC[0] &&
 						eh_recv->ether_shost[1] == MY_DEST_MAC[1] &&
 						eh_recv->ether_shost[2] == MY_DEST_MAC[2] &&
