@@ -24,13 +24,13 @@
 
 #define ETHER_TYPE	0x0800
 
-
 int main(int argc, char *argv[]) {
 
 	const int BUFF_SIZE = 64;
 	int TEST_REPEAT_NUM = 1000;
 	int IS_LOCAL_SERVER = 0;
-	uint8_t MY_DEST_MAC[6] = {0xf4, 0x52, 0x14, 0x94, 0x99, 0x61};
+	//uint8_t MY_DEST_MAC[6] = {0xf4, 0x52, 0x14, 0x94, 0x99, 0x61};
+	uint8_t MY_DEST_MAC[6] = {0x00, 0x02, 0xc9, 0x4d, 0x45, 0xc8};
 
 	/***************** Send Init *****************/
 	int sock_fd_send;
@@ -46,6 +46,19 @@ int main(int argc, char *argv[]) {
 	/* Get interface Name and Add*/
 	if(strcmp(argv[1], "server") == 0)
 		IS_LOCAL_SERVER = 1;
+	else if(strcmp(argv[1], "client") == 0)
+		IS_LOCAL_SERVER = 1;
+	else {
+		printf(">>> Wrong Arg!\n");
+		return -1;
+	}
+
+	if(strlen(argv[2]) != 17) {
+		printf(">>> Invalid Mac Address!\n");
+		return -1;
+	}
+
+	split_mac(argv[2]);
 
 	strcpy(if_name, DEFAULT_IF);
 
@@ -86,10 +99,10 @@ int main(int argc, char *argv[]) {
 	tx_len += sizeof(struct ether_header);
 
 	/* Packet data */
-	send_buff[tx_len++] = 0xde;
-	send_buff[tx_len++] = 0xad;
-	send_buff[tx_len++] = 0xbe;
-	send_buff[tx_len++] = 0xef;
+	send_buff[tx_len] = 0xde;
+	send_buff[tx_len + 1] = 0xad;
+	send_buff[tx_len + 2] = 0xbe;
+	send_buff[tx_len + 3] = 0xef;
 
 	/* Index of the network device */
 	socket_address.sll_ifindex = if_idx.ifr_ifindex;
@@ -186,7 +199,6 @@ int main(int argc, char *argv[]) {
 					printf(">>> Reply Revieved!\n");
 				}
 				else {
-					printf(">>> Not My Packet, Drop!\n");
 					continue;
 				}
 			}
@@ -214,9 +226,9 @@ int main(int argc, char *argv[]) {
 						clock_gettime(CLOCK_MONOTONIC, &ts);
 						uint64_t t2 = ts.tv_nsec;
 						printf(">>> My Packet!\n");
+						printf(">>> data: [0] %X, [1] %X, [2] %X, [3] %X\n", recv_buff[0], recv_buff[1], recv_buff[2], recv_buff[3]);
 					}
 					else {
-						printf(">>> Not My Packet, Drop!\n");
 						continue;
 					}
 			}
@@ -233,3 +245,5 @@ int main(int argc, char *argv[]) {
 	close(sock_fd_recv);
 	return 0;
 }
+
+
