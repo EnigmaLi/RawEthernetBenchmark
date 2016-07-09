@@ -190,7 +190,10 @@ int main(int argc, char *argv[]) {
 					clock_gettime(CLOCK_MONOTONIC, &ts);
 					uint64_t t2 = ts.tv_nsec;
 					time_measure[i] = ((double)(t2 - t1)) / (1000.0 * 2); /* Convert ns to us */
+
 					printf(">>> Reply Revieved!\n");
+					
+					break;
 				}
 				else {
 					continue;
@@ -205,6 +208,7 @@ int main(int argc, char *argv[]) {
 		for(int i = 0; i < TEST_REPEAT_NUM; i++) {
 			while(1) {
 					num_bytes = recvfrom(sock_fd_recv, recv_buff, BUFF_SIZE, 0, NULL, NULL);
+
 					if (eh_recv->ether_shost[0] == MY_DEST_MAC[0] &&
 						eh_recv->ether_shost[1] == MY_DEST_MAC[1] &&
 						eh_recv->ether_shost[2] == MY_DEST_MAC[2] &&
@@ -221,6 +225,8 @@ int main(int argc, char *argv[]) {
 						uint64_t t2 = ts.tv_nsec;
 						printf(">>> My Packet!\n");
 						printf(">>> data: [0] %X, [1] %X, [2] %X, [3] %X\n", recv_buff[0], recv_buff[1], recv_buff[2], recv_buff[3]);
+
+						break;
 					}
 					else {
 						continue;
