@@ -167,11 +167,12 @@ int main(int argc, char *argv[]) {
 		for(int i = 0; i < TEST_REPEAT_NUM; i++) {
 			clock_gettime(CLOCK_MONOTONIC, &ts);
 			uint64_t t1 = ts.tv_nsec;
+			while(1) {
 			if (sendto(sock_fd_send, send_buff, tx_len, 0, (struct sockaddr*)&socket_address,
 															sizeof(struct sockaddr_ll)) < 0) {
 	    		printf("Send failed\n");
 				return -1;
-			}
+			} }
 			printf(">>> Sent!\n");
 			while(1) {
 				num_bytes = recvfrom(sock_fd_recv, recv_buff, BUFF_SIZE, 0, NULL, NULL);
@@ -224,18 +225,14 @@ int main(int argc, char *argv[]) {
 						eh_recv->ether_dhost[2] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[2] &&
 						eh_recv->ether_dhost[3] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[3] &&
 						eh_recv->ether_dhost[4] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[4] &&
-						eh_recv->ether_dhost[5] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[5] &&
-						recv_buff[tx_len] 		== 'a' &&
-						recv_buff[tx_len + 1] 	== 'b' &&
-						recv_buff[tx_len + 2] 	== 'c' &&
-						recv_buff[tx_len + 3] 	== 'd') {
+						eh_recv->ether_dhost[5] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[5]) {
 						clock_gettime(CLOCK_MONOTONIC, &ts);
 						uint64_t t2 = ts.tv_nsec;
 						printf(">>> My Packet!\n");
 						printf(">>> data: [0] %X, [1] %X, [2] %X, [3] %X\n", recv_buff[tx_len], recv_buff[tx_len + 1],
 																			 recv_buff[tx_len + 2], recv_buff[tx_len + 3]);
 
-						break;
+						//break;
 					}
 					else {
 						continue;
