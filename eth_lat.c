@@ -53,11 +53,6 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	if(strlen(argv[2]) != 17) {
-		printf(">>> Invalid Mac Address!\n");
-		return -1;
-	}
-
 
 	strcpy(if_name, DEFAULT_IF);
 
