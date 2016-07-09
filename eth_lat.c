@@ -93,10 +93,10 @@ int main(int argc, char *argv[]) {
 	tx_len += sizeof(struct ether_header);
 
 	/* Packet data */
-	send_buff[tx_len] = 0xde;
-	send_buff[tx_len + 1] = 0xad;
-	send_buff[tx_len + 2] = 0xbe;
-	send_buff[tx_len + 3] = 0xef;
+	send_buff[tx_len] 		= 'a';
+	send_buff[tx_len + 1] 	= 'b';
+	send_buff[tx_len + 2] 	= 'c';
+	send_buff[tx_len + 3] 	= 'd';
 
 	/* Index of the network device */
 	socket_address.sll_ifindex = if_idx.ifr_ifindex;
@@ -186,7 +186,11 @@ int main(int argc, char *argv[]) {
 					eh_recv->ether_dhost[2] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[2] &&
 					eh_recv->ether_dhost[3] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[3] &&
 					eh_recv->ether_dhost[4] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[4] &&
-					eh_recv->ether_dhost[5] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[5]) {
+					eh_recv->ether_dhost[5] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[5] &&
+					recv_buff[tx_len] 		== 'a' &&
+					recv_buff[tx_len + 1] 	== 'b' &&
+					recv_buff[tx_len + 2] 	== 'c' &&
+					recv_buff[tx_len + 3] 	== 'd') {
 					clock_gettime(CLOCK_MONOTONIC, &ts);
 					uint64_t t2 = ts.tv_nsec;
 					time_measure[i] = ((double)(t2 - t1)) / (1000.0 * 2); /* Convert ns to us */
@@ -220,7 +224,11 @@ int main(int argc, char *argv[]) {
 						eh_recv->ether_dhost[2] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[2] &&
 						eh_recv->ether_dhost[3] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[3] &&
 						eh_recv->ether_dhost[4] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[4] &&
-						eh_recv->ether_dhost[5] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[5]) {
+						eh_recv->ether_dhost[5] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[5] &&
+						recv_buff[tx_len] 		== 'a' &&
+						recv_buff[tx_len + 1] 	== 'b' &&
+						recv_buff[tx_len + 2] 	== 'c' &&
+						recv_buff[tx_len + 3] 	== 'd') {
 						clock_gettime(CLOCK_MONOTONIC, &ts);
 						uint64_t t2 = ts.tv_nsec;
 						printf(">>> My Packet!\n");
