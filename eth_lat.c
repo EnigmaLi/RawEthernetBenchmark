@@ -173,8 +173,7 @@ int main(int argc, char *argv[]) {
 					eh_recv->ether_shost[2] == MY_DEST_MAC[2] &&
 					eh_recv->ether_shost[3] == MY_DEST_MAC[3] &&
 					eh_recv->ether_shost[4] == MY_DEST_MAC[4] &&
-					eh_recv->ether_shost[5] == MY_DEST_MAC[5]) 
-					&&
+					eh_recv->ether_shost[5] == MY_DEST_MAC[5] &&
 					eh_recv->ether_dhost[0] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[0] &&
 					eh_recv->ether_dhost[1] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[1] &&
 					eh_recv->ether_dhost[2] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[2] &&
@@ -205,8 +204,7 @@ int main(int argc, char *argv[]) {
 						eh_recv->ether_shost[2] == MY_DEST_MAC[2] &&
 						eh_recv->ether_shost[3] == MY_DEST_MAC[3] &&
 						eh_recv->ether_shost[4] == MY_DEST_MAC[4] &&
-						eh_recv->ether_shost[5] == MY_DEST_MAC[5]
-						&&
+						eh_recv->ether_shost[5] == MY_DEST_MAC[5] &&
 						eh_recv->ether_dhost[0] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[0] &&
 						eh_recv->ether_dhost[1] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[1] &&
 						eh_recv->ether_dhost[2] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[2] &&
