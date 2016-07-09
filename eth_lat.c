@@ -93,10 +93,10 @@ int main(int argc, char *argv[]) {
 	tx_len += sizeof(struct ether_header);
 
 	/* Packet data */
-	send_buff[tx_len] 		= 'a';
-	send_buff[tx_len + 1] 	= 'b';
-	send_buff[tx_len + 2] 	= 'c';
-	send_buff[tx_len + 3] 	= 'd';
+	send_buff[tx_len++] = 'a';
+	send_buff[tx_len++] = 'b';
+	send_buff[tx_len++] = 'c';
+	send_buff[tx_len++] = 'd';
 
 	/* Index of the network device */
 	socket_address.sll_ifindex = if_idx.ifr_ifindex;
@@ -229,8 +229,8 @@ int main(int argc, char *argv[]) {
 						clock_gettime(CLOCK_MONOTONIC, &ts);
 						uint64_t t2 = ts.tv_nsec;
 						printf(">>> My Packet!\n");
-						printf(">>> data: [0] %X, [1] %X, [2] %X, [3] %X\n", recv_buff[tx_len], recv_buff[tx_len + 1],
-																			 recv_buff[tx_len + 2], recv_buff[tx_len + 3]);
+						printf(">>> data: [0] %c, [1] %c, [2] %c, [3] %c\n", recv_buff[tx_len - 4], recv_buff[tx_len - 3],
+																			 recv_buff[tx_len - 2], recv_buff[tx_len - 1]);
 
 						//break;
 					}
