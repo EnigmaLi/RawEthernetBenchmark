@@ -20,7 +20,7 @@
 
 #include <time.h>
 
-#define DEFAULT_IF	"eth1"
+#define DEFAULT_IF	"enp0s3"
 
 #define ETHER_TYPE	0x0800
 
@@ -29,20 +29,20 @@ int main(int argc, char *argv[]) {
 	const int BUFF_SIZE = 64;
 	int TEST_REPEAT_NUM = 1000;
 	int IS_LOCAL_SERVER = 0;
-	//uint8_t MY_DEST_MAC[6] = {0xf4, 0x52, 0x14, 0x94, 0x99, 0x61};
-	uint8_t MY_DEST_MAC[6] = {0x00, 0x02, 0xc9, 0x4d, 0x45, 0xc8};
+	//uint8_t MY_DEST_MAC[6] = {0x08, 0x00, 0x27, 0x08, 0xDE, 0x43};
+	uint8_t MY_DEST_MAC[6] = {0xa4, 0x5e, 0x60, 0xf4, 0x09, 0x1f};
 
 	/***************** Send Init *****************/
 	int sock_fd_send;
 	struct ifreq if_idx;
 	struct ifreq if_mac;
 	int tx_len = 0;
-	char send_buff[BUFF_SIZE];
+	uint8_t send_buff[BUFF_SIZE];
 	struct ether_header *eh_send = (struct ether_header *) send_buff;
 	struct iphdr *iph_send = (struct iphdr *) (send_buff + sizeof(struct ether_header));
 	struct sockaddr_ll socket_address;
 	char if_name[IFNAMSIZ];
-	
+
 	/* Get interface Name and Add*/
 	if(strcmp(argv[1], "server") == 0)
 		IS_LOCAL_SERVER = 1;
@@ -53,11 +53,10 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-
 	strcpy(if_name, DEFAULT_IF);
 
 	/* Open RAW socket to send on */
-	if ((sock_fd_send = socket(AF_PACKET, SOCK_RAW, IPPROTO_RAW)) == -1) {
+	if ((sock_fd_send = socket(PF_PACKET, SOCK_RAW, IPPROTO_RAW)) == -1) {
 	    perror("socket");
 	}
 
@@ -88,6 +87,7 @@ int main(int argc, char *argv[]) {
 	eh_send->ether_dhost[3] = MY_DEST_MAC[3];
 	eh_send->ether_dhost[4] = MY_DEST_MAC[4];
 	eh_send->ether_dhost[5] = MY_DEST_MAC[5];
+
 	/* Ethertype field */
 	eh_send->ether_type = htons(ETH_P_IP);
 	tx_len += sizeof(struct ether_header);
@@ -100,6 +100,7 @@ int main(int argc, char *argv[]) {
 
 	/* Index of the network device */
 	socket_address.sll_ifindex = if_idx.ifr_ifindex;
+	socket_address.sll_family = PF_PACKET;
 
 	/* Address length*/
 	socket_address.sll_halen = ETH_ALEN;
@@ -133,15 +134,16 @@ int main(int argc, char *argv[]) {
 
 	/* Open PF_PACKET socket, listening for EtherType ETHER_TYPE */
 	if ((sock_fd_recv = socket(PF_PACKET, SOCK_RAW, htons(ETHER_TYPE))) == -1) {
-		perror("listener: socket");	
+		perror("listener: socket");
 		return -1;
 	}
 
 	/* Set interface to promiscuous mode - do we need to do this every time? */
-	strncpy(ifopts.ifr_name, if_name, IFNAMSIZ - 1);
-	ioctl(sock_fd_recv, SIOCGIFFLAGS, &ifopts);
-	ifopts.ifr_flags |= IFF_PROMISC;
-	ioctl(sock_fd_recv, SIOCSIFFLAGS, &ifopts);
+	//strncpy(ifopts.ifr_name, if_name, IFNAMSIZ - 1);
+	//ioctl(sock_fd_recv, SIOCGIFFLAGS, &ifopts);
+	//ifopts.ifr_flags |= IFF_PROMISC;
+	//ioctl(sock_fd_recv, SIOCSIFFLAGS, &ifopts);
+
 	/* Allow the socket to be reused - incase connection is closed prematurely */
 	if (setsockopt(sock_fd_recv, SOL_SOCKET, SO_REUSEADDR, &sockopt, sizeof sockopt) == -1) {
 		perror("setsockopt");
@@ -162,18 +164,21 @@ int main(int argc, char *argv[]) {
 
 	/* Work as Client */
 	if(!IS_LOCAL_SERVER) {
+		//printf(">>> Client Started!\n");
 		double time_measure[TEST_REPEAT_NUM];
 
 		for(int i = 0; i < TEST_REPEAT_NUM; i++) {
 			clock_gettime(CLOCK_MONOTONIC, &ts);
 			uint64_t t1 = ts.tv_nsec;
+
+
 			while(1) {
 			if (sendto(sock_fd_send, send_buff, tx_len, 0, (struct sockaddr*)&socket_address,
 															sizeof(struct sockaddr_ll)) < 0) {
 	    		printf("Send failed\n");
 				return -1;
-			} }
-			printf(">>> Sent!\n");
+			}}
+			/*
 			while(1) {
 				num_bytes = recvfrom(sock_fd_recv, recv_buff, BUFF_SIZE, 0, NULL, NULL);
 				if (eh_recv->ether_shost[0] == MY_DEST_MAC[0] &&
@@ -194,16 +199,16 @@ int main(int argc, char *argv[]) {
 					recv_buff[tx_len + 3] 	== 'd') {
 					clock_gettime(CLOCK_MONOTONIC, &ts);
 					uint64_t t2 = ts.tv_nsec;
-					time_measure[i] = ((double)(t2 - t1)) / (1000.0 * 2); /* Convert ns to us */
+					time_measure[i] = ((double)(t2 - t1)) / (1000.0 * 2);
 
 					printf(">>> Reply Revieved!\n");
-					
+
 					break;
 				}
 				else {
 					continue;
 				}
-			}
+			} */
 		}
 	}
 
@@ -213,17 +218,16 @@ int main(int argc, char *argv[]) {
 		for(int i = 0; i < TEST_REPEAT_NUM; i++) {
 			while(1) {
 					num_bytes = recvfrom(sock_fd_recv, recv_buff, BUFF_SIZE, 0, NULL, NULL);
-					printf(">>> Get Pak:\n");
-					printf("shost: %X:%X:%X:%X:%X:%X\n", eh_recv->ether_shost[0], eh_recv->ether_shost[1], eh_recv->ether_shost[2],
-														eh_recv->ether_shost[3], eh_recv->ether_shost[4], eh_recv->ether_shost[5]);
-					printf("dhost: %X:%X:%X:%X:%X:%X\n", eh_recv->ether_dhost[0], eh_recv->ether_dhost[1], eh_recv->ether_dhost[2],
-														eh_recv->ether_dhost[3], eh_recv->ether_dhost[4], eh_recv->ether_dhost[5]);
+					printf(">>> Get Pak!\n");
+
+
 					if (eh_recv->ether_shost[0] == MY_DEST_MAC[0] &&
 						eh_recv->ether_shost[1] == MY_DEST_MAC[1] &&
 						eh_recv->ether_shost[2] == MY_DEST_MAC[2] &&
 						eh_recv->ether_shost[3] == MY_DEST_MAC[3] &&
 						eh_recv->ether_shost[4] == MY_DEST_MAC[4] &&
 						eh_recv->ether_shost[5] == MY_DEST_MAC[5] &&
+
 						eh_recv->ether_dhost[0] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[0] &&
 						eh_recv->ether_dhost[1] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[1] &&
 						eh_recv->ether_dhost[2] == ((uint8_t *)&if_mac.ifr_hwaddr.sa_data)[2] &&
@@ -239,6 +243,7 @@ int main(int argc, char *argv[]) {
 						//break;
 					}
 					else {
+						printf("Not My!\n");
 						continue;
 					}
 			}
@@ -255,5 +260,3 @@ int main(int argc, char *argv[]) {
 	close(sock_fd_recv);
 	return 0;
 }
-
-
