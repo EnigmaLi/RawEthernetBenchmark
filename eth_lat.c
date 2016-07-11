@@ -15,9 +15,6 @@
 #include <net/if.h>
 #include <netinet/ether.h>
 
-#include <linux/ip.h>
-#include <linux/udp.h>
-
 #include <time.h>
 
 #define DEFAULT_IF	"eth1"
@@ -234,8 +231,8 @@ int main(int argc, char *argv[]) {
 			uint64_t t2 = ts.tv_nsec;
 			time_measure[i] = (double)((t2 - t1) / 1000.0); // Transfer 'ns' to 'us'.
 		}
-		for(int i = 0; i < TEST_REPEAT_NUM; i++)
-			sum += time_measure[i];
+		for(int j = 0; j < TEST_REPEAT_NUM; j++)
+			sum += time_measure[j];
 		printf(">>> Mean <1000 x 64Bytes> frame: %f us.\n", sum / TEST_REPEAT_NUM);
 	}
 
@@ -266,7 +263,6 @@ int main(int argc, char *argv[]) {
 		for(int j = 0; j < TEST_REPEAT_NUM; j++)
 				sum += (double)((t_end[j] - t_start[j]) / 1000.0);
 		printf(">>> Server mean: %lf us.\n", sum / TEST_REPEAT_NUM);
-		//sendto(es.sock, es.buff, BUFF_SIZE, 0, (struct sockaddr *)&(es.socket_addr), sizeof(struct sockaddr_ll));
 	}
 	
 	close(es.sock);
