@@ -251,20 +251,27 @@ int main(int argc, char *argv[]) {
 			//Recv
 			int num_bytes = recvfrom(er.sock, er.buff, BUFF_SIZE, 0, NULL, NULL);
 			clock_gettime(CLOCK_MONOTONIC, &ts);
-			//memcpy(&es.buff[BUFF_SIZE - 16], &(ts.tv_nsec), sizeof(uint64_t));
-			uint64_t t1 = ts.tv_nsec;
+			memcpy(&es.buff[BUFF_SIZE - 16], &(ts.tv_nsec), sizeof(uint64_t));
 			printf(">>> Receive Data Frame [%d]:\nData:", i + 1);
 			int j;
-			for(j = 0; j < BUFF_SIZE; j++)
+			printf("dst(");
+			for(j = 0; j < 6; j++)
 				printf("%X ", er.buff[j]);
-			printf("\n");
+			printf("); src(");
+			for(; j < 12; j++)
+				printf("%X ", er.buff[j]);
+			printf("); ether-type(");
+			for(; j < 14; i++)
+				printf("%X ", er.buff[j]);
+			printf("); payload(");
+			for(; j < BUFF_SIZE; j++)
+				printf("%X ");
+			printf(")\n");
 			
 			//Send
 			clock_gettime(CLOCK_MONOTONIC, &ts);
-			uint64_t t2 = ts.tv_nsec;
-			printf(">>> %ld\n", (t2 - t1));
-			//memcpy(&es.buff[BUFF_SIZE - 8], &(ts.tv_nsec), sizeof(uint64_t));
-			if (sendto(es.sock, es.buff, BUFF_SIZE, 0, (struct sockaddr*)&(es.socket_addr),
+			memcpy(&es.buff[BUFF_SIZE - 8], &(ts.tv_nsec), sizeof(uint64_t));
+			if (sendto(es.sock, es.buff, BUFF_SIZE, 0, (struct sockaddr *)&(es.socket_addr),
 															sizeof(struct sockaddr_ll)) < 0) {
 	    		printf("Send failed\n");
 				return -1;
