@@ -21,7 +21,7 @@ def recv_eth(buff_size, interface = "eth1"):
 
     # create a raw socket and bind it to the public interface
     s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
-    s.bind((interface, 0x0800))
+    s.bind((interface, 0))
 
     # receive a package
     print(s.recvfrom(buff_size))
