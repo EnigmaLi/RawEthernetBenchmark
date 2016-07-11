@@ -138,6 +138,7 @@ int recv_init(eth_recv *eth) {
 
 int get_char_val(char c) {
 	switch(c) {
+		/* 0~9 */
 		case '0': return 0;
 		case '1': return 1;
 		case '2': return 2;
@@ -148,21 +149,21 @@ int get_char_val(char c) {
 		case '7': return 7;
 		case '8': return 8;
 		case '9': return 9;
-		
+		/* a~f */
 		case 'a': return 10;
 		case 'b': return 11;
 		case 'c': return 12;
 		case 'd': return 13;
 		case 'e': return 14;
 		case 'f': return 15;
-		
+		/* A~F */
 		case 'A': return 10;
 		case 'B': return 11;
 		case 'C': return 12;
 		case 'D': return 13;
 		case 'E': return 14;
 		case 'F': return 15;
-		
+		/* Else */
 		default: return -1;
 	}
 	return 0;
