@@ -242,7 +242,7 @@ int main(int argc, char *argv[]) {
 		for(int i = 0; i < TEST_REPEAT_NUM; i++) {
 			
 			int num_bytes = recvfrom(er.sock, er.buff, BUFF_SIZE, 0, NULL, NULL);
-			printf(">>> Receive Data Frame [%d]:\nData:");
+			printf(">>> Receive Data Frame [%d]:\nData:", i);
 			for(int i = 0; i < num_bytes; i++)
 				printf("%X ", er.buff[i]);
 			printf("\n");
