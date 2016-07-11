@@ -189,16 +189,26 @@ int main(int argc, char *argv[]) {
 	int IS_LOCAL_SERVER = 0;
 	uint8_t dest_mac[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 	
-	eth_send es;
-	eth_recv er;
-	send_init(&es, dest_mac);
-	recv_init(&er);
+	if(strcmp(argv[1], "server") == 0)
+		IS_LOCAL_SERVER = 1;
+	else if(strcmp(argv[1], "client") == 0)
+		IS_LOCAL_SERVER = 0;
+	else {
+		printf(">>> Invalid Server or Client Option!\n");
+		exit(-1);
+	}
 	
 	if(str_to_mac(argv[2], dest_mac) < 0) {
 		printf(">>> Invalid Mac Address!\n");
 		exit(-1);
 	}
 
+	
+	eth_send es;
+	eth_recv er;
+	send_init(&es, dest_mac);
+	recv_init(&er);
+	
 	/***************** Start Test *****************/
 	struct timespec ts;
 
