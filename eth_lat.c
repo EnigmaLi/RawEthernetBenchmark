@@ -252,21 +252,7 @@ int main(int argc, char *argv[]) {
 			int num_bytes = recvfrom(er.sock, er.buff, BUFF_SIZE, 0, NULL, NULL);
 			clock_gettime(CLOCK_MONOTONIC, &ts);
 			memcpy(&es.buff[BUFF_SIZE - 16], &(ts.tv_nsec), sizeof(uint64_t));
-			printf(">>> Receive Data Frame [%d]:\nData:", i + 1);
-			int j;
-			printf("dst(");
-			for(j = 0; j < 6; j++)
-				printf("%X ", er.buff[j]);
-			printf("); src(");
-			for(; j < 12; j++)
-				printf("%X ", er.buff[j]);
-			printf("); ether-type(");
-			for(; j < 14; i++)
-				printf("%X ", er.buff[j]);
-			printf("); payload(");
-			for(; j < BUFF_SIZE; j++)
-				printf("%X ");
-			printf(")\n");
+			printf(">>> Receive Data Frame [%d].\n", i + 1);
 			
 			//Send
 			clock_gettime(CLOCK_MONOTONIC, &ts);
