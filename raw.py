@@ -1,44 +1,74 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import socket
+import time
 
-def send_eth(src, dst, eth_type, payload, interface = "eth1"):
-  """Send raw Ethernet packet on interface."""
-
-  assert(len(src) == len(dst) == 6) # 48-bit ethernet addresses
-  assert(len(eth_type) == 2) # 16-bit ethernet type
-
-  s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
-
-  ## From the docs: "For raw packet sockets the address is a tuple:
-  ## (ifname, proto [,pkttype [,hatype]])
-  s.bind((interface, 0))
-  s.send(src + dst + eth_type + payload)
-  s.close()
-
-def recv_eth(buff_size, interface = "eth1"):
-
-    # create a raw socket and bind it to the public interface
-    s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
-    s.bind((interface, 0x809B))
-
-    # receive a package
-    print(s.recvfrom(buff_size))
-
-    s.close()
+class ether_benchmark(object):
+	"""  """
+	def __init__(self, is_server, local_mac, dest_mac, intf = "eth1"):
+		self.__is_server = is_server
+		## Raw Socket Init
+		self.__skt_send = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
+		self.__skt_recv = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
+		self.__skt_send.bind((intf, 0))
+		self.__skt_recv.bind((intf, 0x809B))	## ETHER_TYPE = ETHER_TALK
+		
+		## Order! Order! Order!
+		self.__ether_header = dest_mac + local_mac + [0x80, 0x9B]
+		
+		self.__payload = [0x61, 0x62, 0x63, 0x64, 0x61, 0x62, 0x63, 0x64, 0x61, 0x62, 0x63, 0x64, 0x61, 0x62,
+						  0x63, 0x64, 0x61, 0x62, 0x63, 0x64, 0x61, 0x62, 0x63, 0x64, 0x61, 0x62, 0x63, 0x64,
+						  0x61, 0x62, 0x63, 0x64, 0x61, 0x62, 0x63, 0x64, 0x61, 0x62, 0x63, 0x64, 0x61, 0x62,
+						  0x63, 0x64, 0x61, 0x62, 0x63, 0x64, 0x61, 0x62]
+		
+	def __del__(self):
+		self.__skt_send.close()
+		self.__skt_recv.close()
+	
+	def __pack(self, byte_seq):
+		## Convert List of Bytes to Byte String
+		return b"".join(map(chr, byte_seq))
+		
+	def __send_eth(self, payload):
+		data_pack = self.__pack(self.__ether_header + payload)
+		self.__skt_send.send(data_pack)
+		
+	def __recv_eth(self, buff_size):
+		return self.__skt_recv.recvfrom(buff_size)
+		
+	def run(self, rep):
+		## Work as Server Mode
+		if self.__is_server:
+			for i in range(0, rep):
+				packet = self.__recv_eth(64)
+				print(">>> Receive Packet [" + str(i) +"]:")
+				print("Packet Content: %s" % packet)
+				
+		## Work as Client Mode	
+		else:
+			for i in range(0, rep):
+				t1 = time.time()
+				self.__send_eth(self.__payload)
+				t2 = time.time()
+				print(("%.20f" % t2))
+	
+def str_to_mac(str_mac):
+	pass
 
 if __name__ == "__main__":
-    if(sys.argv[1] == "client"):
+	if(sys.argv[1] == "client"):
+		is_srv = False
+	elif(sys.argv[1] == "server"):
+		is_srv = True
+	else:
+		print(">>> Invalid arguments!")
+		os.exit(-1)
 
-        while(True):
-            #send_eth("\x08\x00\x27\x08\xDE\x43", "\xA4\x5E\x60\xF4\x09\x1F", "\x00\x05", "hello")
-            #send_eth("\x08\x00\x27\x08\xDE\x43", "\x08\x00\x27\x08\xDE\x43", "\x08\x00", "hello")
-			send_eth("\x00\x02\xC9\x4D\x45\xC8", "\xF4\x52\x14\x94\x99\x60", "\x80\x9B", "hello")
 
-
-    elif(sys.argv[1] == "server"):
-        while(True):
-            recv_eth(64)
-    else:
-        pass
+	print("AAA")
+	eth = ether_benchmark(is_srv, [0x00, 0x02, 0xC9, 0x4D, 0x45, 0xC8], [0xF4, 0x52, 0x14, 0x94, 0x99, 0x60])
+	eth.run(100)
+        
+        
