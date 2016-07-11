@@ -14,14 +14,14 @@ def send_eth(src, dst, eth_type, payload, interface = "eth1"):
   # From the docs: "For raw packet
   # sockets the address is a tuple (ifname, proto [,pkttype [,hatype]])"
   s.bind((interface, 0))
-  s.send((src + dst + eth_type + payload).encode("utf-8"))
+  s.send(src + dst + eth_type + payload)
   s.close()
 
 def recv_eth(buff_size, interface = "eth1"):
 
     # create a raw socket and bind it to the public interface
     s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
-    s.bind((interface, 0))
+    s.bind((interface, 0x00E5))
 
     # receive a package
     print(s.recvfrom(buff_size))
