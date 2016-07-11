@@ -220,33 +220,39 @@ int main(int argc, char *argv[]) {
 		for(int i = 0; i < TEST_REPEAT_NUM; i++) {
 			clock_gettime(CLOCK_MONOTONIC, &ts);
 			uint64_t t1 = ts.tv_nsec;
-			
-			/* Send & Recv Round */
+			//Send
 			if (sendto(es.sock, es.buff, BUFF_SIZE, 0, (struct sockaddr*)&(es.socket_addr),
 															sizeof(struct sockaddr_ll)) < 0) {
 	    		printf("Send failed\n");
 				return -1;
 			}
+			//Recv
 			int num_bytes = recvfrom(er.sock, er.buff, BUFF_SIZE, 0, NULL, NULL);
-
 			clock_gettime(CLOCK_MONOTONIC, &ts);
 			uint64_t t2 = ts.tv_nsec;
+			
+			time_measure[i] = (double)((t2 - t1) / (1000.0 * 2));
+			printf("%d\n", (t2 - t1));
 		}
+		double sum = 0.0;
+		for(int i = 0; i < TEST_REPEAT_NUM; i++)
+			sum += time_measure[i];
+		printf(">>> Mean <1000 x 64Bytes> frame: %f us.\n", (sum / 1000));
 	}
 
 	/* Work as Server */
 	else {
 		printf(">>> Server Started!\n");
-		double time_measure[TEST_REPEAT_NUM];
 
 		for(int i = 0; i < TEST_REPEAT_NUM; i++) {
-			
+			//Recv
 			int num_bytes = recvfrom(er.sock, er.buff, BUFF_SIZE, 0, NULL, NULL);
-			printf(">>> Receive Data Frame [%d]:\nData:", i);
-			for(int i = 0; i < num_bytes; i++)
-				printf("%X ", er.buff[i]);
-			printf("\n");
-			/* Send & Recv Round */
+			clock_gettime(CLOCK_MONOTONIC, &ts);
+			//printf(">>> Receive Data Frame [%d]:\nData:", i);
+			//for(int i = 0; i < num_bytes; i++)
+			//	printf("%X ", er.buff[i]);
+			//printf("\n");
+			//Send
 			if (sendto(es.sock, es.buff, BUFF_SIZE, 0, (struct sockaddr*)&(es.socket_addr),
 															sizeof(struct sockaddr_ll)) < 0) {
 	    		printf("Send failed\n");
