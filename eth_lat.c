@@ -226,42 +226,47 @@ int main(int argc, char *argv[]) {
 	    		printf("Send failed\n");
 				return -1;
 			}
+			
 			//Recv
 			int num_bytes = recvfrom(er.sock, er.buff, BUFF_SIZE, 0, NULL, NULL);
 			clock_gettime(CLOCK_MONOTONIC, &ts);
 			uint64_t t2 = ts.tv_nsec;
-			
-			uint64_t nt1, nt2;
-			memcpy(&nt1, &er.buff[BUFF_SIZE - 16], sizeof(uint64_t));
-			memcpy(&nt2, &er.buff[BUFF_SIZE - 8], sizeof(uint64_t));
-			time_measure[i] = (double)((t2 - t1) / (1000.0 * 2));
-			printf("%d\n", (t2 - t1));
+			time_measure[i] = (double)((t2 - t1) / 1000.0); // Transfer 'ns' to 'us'.
 		}
 		double sum = 0.0;
 		for(int i = 0; i < TEST_REPEAT_NUM; i++)
 			sum += time_measure[i];
-		printf(">>> Mean <1000 x 64Bytes> frame: %f us.\n", (sum / 1000));
+		printf(">>> Mean <1000 x 64Bytes> frame: %f us.\n", sum / TEST_REPEAT_NUM);
 	}
 
 	/* Work as Server */
 	else {
 		printf(">>> Server Started!\n");
-
+		uint64_t t_start[TEST_REPEAT_NUM];
+		uint64_t t_end[TEST_REPEAT_NUM];
+		double sum = 0.0;
+		
 		for(int i = 0; i < TEST_REPEAT_NUM; i++) {
 			//Recv
 			int num_bytes = recvfrom(er.sock, er.buff, BUFF_SIZE, 0, NULL, NULL);
 			clock_gettime(CLOCK_MONOTONIC, &ts);
-			memcpy(&es.buff[BUFF_SIZE - 16], &(ts.tv_nsec), sizeof(uint64_t));
+			t_start[i] = ts.tv_nsec;
 			printf(">>> Receive Data Frame [%d].\n", i + 1);
 			
 			//Send
 			clock_gettime(CLOCK_MONOTONIC, &ts);
+			t_end[i] = ts.tv_nsec;
 			memcpy(&es.buff[BUFF_SIZE - 8], &(ts.tv_nsec), sizeof(uint64_t));
 			if (sendto(es.sock, es.buff, BUFF_SIZE, 0, (struct sockaddr *)&(es.socket_addr),
 															sizeof(struct sockaddr_ll)) < 0) {
 	    		printf("Send failed\n");
 				return -1;
 			}
+			
+			for(int j = 0; j < TEST_REPEAT_NUM; j++)
+				sum += (double)((t_end[j] - t_start[j]) / 1000.0);
+			printf(">>> Server mean: %lf us.\n", sum / TEST_REPEAT_NUM);
+			//sendto(es.sock, es.buff, BUFF_SIZE, 0, (struct sockaddr *)&(es.socket_addr), sizeof(struct sockaddr_ll));
 		}
 	}
 	
